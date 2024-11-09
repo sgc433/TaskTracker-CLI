@@ -7,7 +7,8 @@ internal class Program
 {
     private static void Main(string[] args)
     {
-        List<string> tasks = new List<string>();
+        List<Task> tasks = new List<Task>();
+        List<string> jtasks = new List<string>();
         string? input = Console.ReadLine();
         string[] inputs = input.Split(" ");
         while (true) 
@@ -35,7 +36,7 @@ internal class Program
             }
 
              input = Console.ReadLine();
-             inputs = input?.Split("");
+             inputs = input?.Split(" ");
 
             if (inputs[0].ToLower() == "exit")
             {
@@ -43,44 +44,39 @@ internal class Program
             }
         }
 
-
         
-        /*AddTask("");
-        Console.WriteLine(tasks.Count);
-        ListTask();*/
-
-
-
-
-
         void AddTask(string descrip)
             {
 
                 var task = new Task
                 {
-                    ID = tasks.Count+1,
+                    ID = jtasks.Count+1,
                     description = descrip,
                     status = "todo",
                     createdAt = DateTime.Now,
                     updatedAt = DateTime.Now
                 };
-                string jsonstr = JsonSerializer.Serialize(task);
+                string jsonstr = JsonSerializer.Serialize(task, new JsonSerializerOptions { WriteIndented=true});
+                
                 if (jsonstr != null) {
 
-                tasks.Add(jsonstr);
-
+                jtasks.Add(jsonstr);
+                tasks.Add(task);
                 }
                 
             }
         void ListTask()
             {
-              if (tasks.Count == 0) { Console.WriteLine("No tasks yet"); }
-              else { for (int i = 0; i < tasks.Count; i++) { Console.WriteLine(tasks[i]); } }
+              if (jtasks.Count == 0) { Console.WriteLine("No tasks yet"); }
+              else { for (int i = 0; i < tasks.Count; i++) { Console.WriteLine(tasks[i].ID + " " + tasks[i].description); } }
         }
-        
+        void DeleteTask(int id)
+        {
+
+        }
     }
 }
-// Сделать пару функций и подключить гит
+// Сделать функции update + delete
 public class Task
 {
     public int ID { get; set; }
