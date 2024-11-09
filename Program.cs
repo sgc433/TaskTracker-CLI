@@ -8,19 +8,24 @@ internal class Program
     private static void Main(string[] args)
     {
         List<string> tasks = new List<string>();
-        while (true)
+        string? input = Console.ReadLine();
+        string[] inputs = input.Split(" ");
+        while (true) 
         {
-            
-            if (args.Length >= 0)
-            {
-                args.Append(Console.ReadLine());
-            }
 
             try
             {
-                if (args[0] == "add")
+                switch (inputs[0])
                 {
-                    AddTask(args[1]);
+                    case "add":
+                        AddTask(inputs[1]);
+                        break;
+                    case "list":
+                        ListTask();
+                        break;
+                    default:
+                        break;
+
                 }
             }
             catch (Exception e)
@@ -29,15 +34,24 @@ internal class Program
                 Console.WriteLine(e);
             }
 
-            Console.WriteLine(tasks.Count);
-            ListTask();
+             input = Console.ReadLine();
+             inputs = input?.Split("");
 
-            /*if (args[0].ToLower() == "exit")
+            if (inputs[0].ToLower() == "exit")
             {
                 break;
-            }*/
+            }
         }
+
+
         
+        /*AddTask("");
+        Console.WriteLine(tasks.Count);
+        ListTask();*/
+
+
+
+
 
         void AddTask(string descrip)
             {
@@ -60,17 +74,8 @@ internal class Program
             }
         void ListTask()
             {
-                try
-                {
-                    for (int i = 0; i < tasks.Count; i++) { Console.WriteLine(tasks[i]); }
-
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("No tasks yet" + e);
-                    
-                }
-
+              if (tasks.Count == 0) { Console.WriteLine("No tasks yet"); }
+              else { for (int i = 0; i < tasks.Count; i++) { Console.WriteLine(tasks[i]); } }
         }
         
     }
