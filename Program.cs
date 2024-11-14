@@ -1,14 +1,15 @@
 ﻿using System.Text.Json;
 using System;
 using System.Threading.Tasks;
-
+using System.Net.Http.Json;
+//using Newtonsoft.Json;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-        List<Task> tasks = new List<Task>();
-        List<string> jtasks = new List<string>();
+        string filePath = "Y:\\Просто скрипты\\void c# project\\Tasks.json";
+        List<Task> jtasks = new List<Task>();
         string? input = Console.ReadLine();
         string[] inputs = input.Split(" ");
         while (true) 
@@ -48,27 +49,31 @@ internal class Program
         void AddTask(string descrip)
             {
 
-                var task = new Task
-                {
+                Task task = new Task
+                {   
                     ID = jtasks.Count+1,
                     description = descrip,
                     status = "todo",
                     createdAt = DateTime.Now,
                     updatedAt = DateTime.Now
                 };
-                string jsonstr = JsonSerializer.Serialize(task, new JsonSerializerOptions { WriteIndented=true});
-                
-                if (jsonstr != null) {
+                jtasks.Add(task);
+                string jsonstr = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented=true});
 
-                jtasks.Add(jsonstr);
-                tasks.Add(task);
-                }
-                
-            }
+            if (jsonstr != null) { File.WriteAllText(filePath, jsonstr); }
+
+               
+        }
         void ListTask()
+        {
+            string jtask = File.ReadAllText(filePath);
+            Task[] datalist = JsonSerializer.Deserialize<Task[]>(jtask);
+            foreach (var data in datalist)
             {
-              if (jtasks.Count == 0) { Console.WriteLine("No tasks yet"); }
-              else { for (int i = 0; i < tasks.Count; i++) { Console.WriteLine(tasks[i].ID + " " + tasks[i].description); } }
+                Console.WriteLine(data.ID + " " + data.description);
+            }
+            
+            
         }
         void DeleteTask(int id)
         {
@@ -76,7 +81,7 @@ internal class Program
         }
     }
 }
-// Сделать функции update + delete
+// Наладить работу всех функций с json файлом 
 public class Task
 {
     public int ID { get; set; }
