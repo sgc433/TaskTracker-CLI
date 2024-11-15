@@ -1,14 +1,27 @@
 ﻿using System.Text.Json;
 using System;
 using System.Threading.Tasks;
-
+using System.Net.Http.Json;
+//using Newtonsoft.Json;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         string filePath = "Y:\\Просто скрипты\\void c# project\\Tasks.json";
-        List<string> jtasks = new List<string>();
+        List<Task> jtasks = new List<Task>();
+
+        if (File.Exists(filePath))
+        {
+            string jsonContent = File.ReadAllText(filePath);
+            jtasks = JsonSerializer.Deserialize<List<Task>>(jsonContent) ?? new List<Task>();
+        }
+        else
+        {
+            jtasks = new List<Task>();
+        }
+
+
         string? input = Console.ReadLine();
         string[] inputs = input.Split(" ");
         while (true) 
@@ -23,6 +36,9 @@ internal class Program
                         break;
                     case "list":
                         ListTask();
+                        break;
+                    case "delete":
+                        DeleteTask(inputs[1]);
                         break;
                     default:
                         break;
@@ -49,37 +65,89 @@ internal class Program
             {
 
                 Task task = new Task
-                {
+                {   
                     ID = jtasks.Count+1,
                     description = descrip,
                     status = "todo",
                     createdAt = DateTime.Now,
                     updatedAt = DateTime.Now
                 };
-                string jsonstr = JsonSerializer.Serialize(task, new JsonSerializerOptions { WriteIndented=true});
-                
-                if (jsonstr != null) { jtasks.Add(jsonstr); File.WriteAllText(filePath, JsonSerializer.Serialize(jsonstr, new JsonSerializerOptions { WriteIndented = true })); }
+                jtasks.Add(task);
+                string jsonstr = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented=true});
 
+            if (jsonstr != null) { File.WriteAllText(filePath, jsonstr); }
+
+               
         }
         void ListTask()
         {
-            List<Task> list = new List<Task>();
-            Task t = new Task();
+            try
+            {
+                string jtask = File.ReadAllText(filePath);
+                Task[] datalist = JsonSerializer.Deserialize<Task[]>(jtask);
+                foreach (var data in datalist)
+                {
+                    Console.WriteLine(data.ID + " " + data.description);
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No tasks yet");
+               
+            }
+        
+        }
+        /*void DeleteTask(string id)
+        {   int Id = int.Parse(id);
+            jtasks.RemoveAt(Id-1);
+            if (Id == 1) 
+            {
                 for (int i = 0; i < jtasks.Count; i++)
                 {
-                t = JsonSerializer.Deserialize<Task>(jtasks[i]);
-                if (t != null) { list.Add(t); }
+                    jtasks[i].ID -=1;
                 }
-              if (jtasks.Count == 0) { Console.WriteLine("No tasks yet"); }
-              else { for (int i = 0; i < list.Count; i++) { Console.WriteLine(list[i].ID + " " + list[i].description); } }
-        }
-        void DeleteTask(int id)
+            }
+            else if (Id > 1 && Id != jtasks.Count) 
+            {
+                for (int i = Id-1; i < jtasks.Count; i++)
+                {
+                    jtasks[i].ID -= 1;
+                }
+            }
+            string jsonContent = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(filePath, jsonContent);
+        }*/
+        void DeleteTask(string id)
         {
+            if (!int.TryParse(id, out int Id) || Id <= 0 || Id > jtasks.Count)
+            {
+                Console.WriteLine("Invalid task ID");
+                return;
+            }
 
+            // Удаляем задачу по ID (Id-1, так как индексация с 0)
+            jtasks.RemoveAt(Id - 1);
+
+            // Перенумерация оставшихся задач
+            for (int i = 0; i < jtasks.Count; i++)
+            {
+                jtasks[i].ID = i + 1;
+            }
+
+            try
+            {
+                // Запись обновленных данных в файл
+                string jsonContent = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, jsonContent);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine("Error writing to file: " + ex.Message);
+            }
         }
     }
 }
-// Сделать функции update + delete
+// Наладить работу всех функций с json файлом 
 public class Task
 {
     public int ID { get; set; }
