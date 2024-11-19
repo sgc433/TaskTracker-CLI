@@ -2,6 +2,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Net.Http.Json;
+using System.Runtime.Intrinsics.X86;
 //using Newtonsoft.Json;
 
 internal class Program
@@ -35,7 +36,13 @@ internal class Program
                         AddTask(inputs[1]);
                         break;
                     case "list":
-                        ListTask();
+                        if (inputs.Length == 1) { ListTask(); }
+                        else if (inputs.Length != 1) 
+                        {
+                            if (inputs[1] == "todo") { ListTODOTask(); }
+                            if (inputs[1] == "done") { ListDoneTask(); }
+                            if (inputs[1] == "in-progress") { ListInProgressTask(); }
+                        }
                         break;
                     case "delete":
                         DeleteTask(inputs[1]);
@@ -93,30 +100,94 @@ internal class Program
             catch (Exception)
             {
                 Console.WriteLine("No tasks yet");
-               
+
             }
-        
+
         }
-        /*void DeleteTask(string id)
-        {   int Id = int.Parse(id);
-            jtasks.RemoveAt(Id-1);
-            if (Id == 1) 
+        void ListDoneTask()
+        {
+            try
             {
-                for (int i = 0; i < jtasks.Count; i++)
+                int cnt = 0;
+                string jtask = File.ReadAllText(filePath);
+                Task[] datalist = JsonSerializer.Deserialize<Task[]>(jtask);
+                foreach (var data in datalist)
                 {
-                    jtasks[i].ID -=1;
+                    if (data.status == "done")
+                    {
+                        cnt++;
+                        Console.WriteLine(data.ID + " " + data.description);
+                    }
+
                 }
+                if (cnt == 0)
+                {
+                    Console.WriteLine("No tasks with status 'done'");
+                }
+                
             }
-            else if (Id > 1 && Id != jtasks.Count) 
+            catch (Exception)
             {
-                for (int i = Id-1; i < jtasks.Count; i++)
-                {
-                    jtasks[i].ID -= 1;
-                }
+                Console.WriteLine("No tasks with status 'done'");
+
             }
-            string jsonContent = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(filePath, jsonContent);
-        }*/
+         }
+        void ListTODOTask()
+        {
+            try
+            {
+                int cnt = 0;
+                string jtask = File.ReadAllText(filePath);
+                Task[] datalist = JsonSerializer.Deserialize<Task[]>(jtask);
+                foreach (var data in datalist)
+                {
+                    if (data.status == "todo")
+                    {
+                        cnt++;
+                        Console.WriteLine(data.ID + " " + data.description);
+                    }
+
+                }
+                if (cnt == 0)
+                {
+                    Console.WriteLine("No tasks with status 'to do'");
+                }
+
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No tasks with status 'to do'");
+
+            }
+        }
+        void ListInProgressTask()
+        {
+            try
+            {
+                int cnt = 0;
+                string jtask = File.ReadAllText(filePath);
+                Task[] datalist = JsonSerializer.Deserialize<Task[]>(jtask);
+                foreach (var data in datalist)
+                {
+                    if (data.status == "in-progress")
+                    {
+                        cnt++;
+                        Console.WriteLine(data.ID + " " + data.description);
+                    }
+
+                }
+                if (cnt == 0)
+                {
+                    Console.WriteLine("No tasks with status 'in-progress'");
+                }
+
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No tasks with status 'in-progress'");
+
+            }
+        }
         void DeleteTask(string id)
         {
             if (!int.TryParse(id, out int Id) || Id <= 0 || Id > jtasks.Count)
@@ -147,7 +218,7 @@ internal class Program
         }
     }
 }
-// Наладить работу всех функций с json файлом 
+// Исправить работу 3х новых функций
 public class Task
 {
     public int ID { get; set; }
