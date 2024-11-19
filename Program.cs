@@ -3,7 +3,6 @@ using System;
 using System.Threading.Tasks;
 using System.Net.Http.Json;
 using System.Runtime.Intrinsics.X86;
-//using Newtonsoft.Json;
 
 internal class Program
 {
@@ -47,6 +46,15 @@ internal class Program
                     case "delete":
                         DeleteTask(inputs[1]);
                         break;
+                    case "update":
+                        UpdateTask(inputs[1], inputs[2]);
+                        break;
+                    case "mark-done":
+                        MarkDone(inputs[1]);
+                        break;
+                    case "mark-in-progress":
+                        MarkInProgress(inputs[1]);
+                        break;
                     default:
                         break;
 
@@ -66,7 +74,7 @@ internal class Program
                 break;
             }
         }
-
+        
         
         void AddTask(string descrip)
             {
@@ -214,6 +222,67 @@ internal class Program
             catch (IOException ex)
             {
                 Console.WriteLine("Error writing to file: " + ex.Message);
+            }
+        }
+        void UpdateTask(string id, string newDesc)
+        {
+            try
+            {
+                for (int i = 0; i < jtasks.Count; i++)
+                {
+                    if (jtasks[i].ID == int.Parse(id))
+                    {
+                        jtasks[i].description = newDesc;
+                    }
+                }
+                string jsonContent = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, jsonContent);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+        }
+        void MarkDone(string id)
+        {
+            try
+            {
+                for (int i = 0; i < jtasks.Count; i++)
+                {
+                    if (jtasks[i].ID == int.Parse(id))
+                    {
+                        jtasks[i].status = "done";
+                    }
+                }
+                string jsonContent = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, jsonContent);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+        void MarkInProgress(string id)
+        {
+            try
+            {
+                for (int i = 0; i < jtasks.Count; i++)
+                {
+                    if (jtasks[i].ID == int.Parse(id))
+                    {
+                        jtasks[i].status = "in-progress";
+                    }
+                }
+                string jsonContent = JsonSerializer.Serialize(jtasks, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, jsonContent);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }
